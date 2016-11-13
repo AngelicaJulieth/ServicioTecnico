@@ -83,6 +83,16 @@ body {
     background-color: #f5886e;
     float: left;
 }
+.fa-laptop, .fa-user{
+    position: relative;
+    opacity: 0.5;
+    left: 8px;
+    top: 10px;
+}
+.fa-user{
+    left: 16px;
+}
+
 .messages .message.left .text_wrapper {
     background-color: #ffe6cb;
     margin-left: 20px;
@@ -188,7 +198,7 @@ body {
     text-align: center;
     float: right;
 }
-.bottom_wrapper .send_message:hover {
+.bottom_wrapper .send_message:hover, #btnEnviarMensaje {
     color: #a3d063;
     background-color: #fff;
 }
@@ -198,7 +208,42 @@ body {
     display: inline-block;
     line-height: 48px;
 }
+#btnEnviarMensaje{
+    font-size: 18px;
+    font-weight: 300;
+    color: #fff;
+    
+    width: 140px;
+    height: 50px;
+    border-radius: 50px;
+    background-color: #a3d063;
+    border: 2px solid #a3d063;
+    transition: all 0.2s linear;
+    float: right;
+}
 
 .message_template {
     display: none;
+}
+.navbar-custom {
+    background-color: #23b7e5;
+    font-weight: 700;
+    border: none;
+}
+.navbar-custom, header .intro-text .name {
+    font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    text-transform: uppercase;
+}
+.navbar-custom .navbar-brand {
+    font-size: 2em;
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    transition: all .3s;
+}
+
+.navbar-custom .navbar-brand, .navbar-custom .navbar-brand.active, .navbar-custom .navbar-brand:active, .navbar-custom .navbar-brand:focus, .navbar-custom .navbar-brand:hover, .navbar-custom .navbar-nav li a, header {
+    color: #fff;
+}
+.fa{
+    padding-right: 10px;
 }

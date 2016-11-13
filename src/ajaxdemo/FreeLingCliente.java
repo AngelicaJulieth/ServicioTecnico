@@ -14,7 +14,7 @@ import java.net.Socket;
  *
  * @author ESTACION
  */
-public class FreeLingCliente {
+    public class FreeLingCliente {
 
     private static final String SERVER_READY_MSG = "FL-SERVER-READY";
     private static final String RESET_STATS_MSG = "RESET_STATS";
