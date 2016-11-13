@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * @author ESTACION
  */
 public class PLN {
-    private static final String IPO_FREELING = "192.168.0.31";
+    private static final String IPO_FREELING = "192.168.0.55";
     private final FreeLingCliente free;
     
     public PLN(){
