@@ -2,26 +2,33 @@ package ajaxdemo;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@WebServlet("/ActionServlet")
 public class ActionServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 //	private ArrayList<Persona> personas = new ArrayList<>();
 
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //No hay peticiones get
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // TODO Auto-generated method stub	
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/plain");
+        //Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+            
+        
 
-        response.setContentType("text/html; charset=iso-8859-1");
+        
         PrintWriter out = response.getWriter();
 
         // Obtengo los datos de la peticion
@@ -34,11 +41,11 @@ public class ActionServlet extends HttpServlet {
             resp += mensaje;
             PLN prueba = new PLN();
             String respAux[][];
-            respAux = prueba.normalizarMensaje(mensaje);
-            resp += Arrays.deepToString(respAux);
-        }
+            //respAux = prueba.normalizarMensaje(mensaje);
+            //resp += Arrays.deepToString(respAux);
 
-        out.println(resp);
+        }
+        out.print(resp);
 
     }
 
