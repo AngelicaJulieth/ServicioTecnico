@@ -33,7 +33,7 @@ public class ActionServlet extends HttpServlet {
         
         response.setContentType("application/json");
         String mensaje = request.getParameter("mensaje");
-        similitud = jaroWinkler.similarity("Hola", "Holi");
+        similitud = jaroWinkler.similarity("no está encendido", "enciende");
         respuesta.append(similitud.toString());
         
         /*if (!mensaje.equals("")) {
