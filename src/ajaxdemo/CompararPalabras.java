@@ -21,6 +21,7 @@ public class CompararPalabras {
         free = new FreeLingCliente("172.17.2.98", 1024);
         sinonimosEstado = new HashMap<String, String[]>();
         sinonimosEstado.put("apagado", new String[]{"apagado", "no enciende"});
+        sinonimosEstado.put("parpadeando", new String[]{"apagado", "no enciende"});//FIXME: Cambiar sinonimos
 
         sinonimosNombresEstado = new HashMap<String, String[]>();
         sinonimosNombresEstado.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido"});
@@ -30,13 +31,14 @@ public class CompararPalabras {
         sinonimosPartesComputador.put("computador", new String[]{"computador", "PC", "CPU", "Ordenador", "Procesador"});
     }
 
-    private void desintegrarFrase(String frase) {
-        String palabras[] = frase.split("");
+    public void desintegrarFrase(String frase) {
+        String palabras[] = frase.split(" ");
         String nombreEstado = null;
         String estado;
         Computador computador = new Computador();
         for (int indice = 0; indice < palabras.length; indice++) {
             String palabraAnterior = indice > 1 ? palabras[indice - 1] : "";
+            
             estado = obtenerEstado(palabras[indice], palabraAnterior);
             obtenerNombreEstado(palabras[indice], nombreEstado);
             obtenerParteDeComputador(computador, palabras[indice]);
@@ -50,7 +52,7 @@ public class CompararPalabras {
         }
     }
 
-    public String obtenerEstado(String palabra, String anterior) {
+    private String obtenerEstado(String palabra, String anterior) {
         double ranking = 0.0;
         for (Map.Entry<String, String[]> arregloSinonimo : sinonimosEstado.entrySet()) {
             for (int i = 0; i < arregloSinonimo.getValue().length; i++) {
