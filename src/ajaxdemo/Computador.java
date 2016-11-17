@@ -1,12 +1,8 @@
 package ajaxdemo;
-
-import java.util.HashMap;
-import java.util.List;
-
 public class Computador {
 
     private String nombre;
-    private HashMap<String, String> estados;
+    private String estado;
 
     public String getNombre() {
         return nombre;
@@ -15,13 +11,12 @@ public class Computador {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-
-    public HashMap<String, String> getEstados() {
-        return estados;
+    public String getEstado() {
+        return estado;
     }
 
-    public void setEstados(HashMap<String, String> estados) {
-        this.estados = estados;
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
 }

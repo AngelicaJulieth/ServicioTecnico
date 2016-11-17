@@ -2,7 +2,9 @@ package ajaxdemo;
 
 import info.debatty.java.stringsimilarity.JaroWinkler;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,17 +17,25 @@ public class CompararPalabras {
     private HashMap<String, String[]> sinonimosEstado;
     private HashMap<String, String[]> sinonimosNombresEstado;
     private HashMap<String, String[]> sinonimosPartesComputador;
+    private Computador computador;
+    private HashMap<String, String> propiedadesComputador;
+    //private List<Computador> partesComputador;
 
-    public void CompararPalabras(String frase) {
+    public void inicializarVariables() {
         jaroWinkler = new JaroWinkler();
-        free = new FreeLingCliente("172.17.2.98", 1024);
+
+        //  partesComputador = new ArrayList<Computador>();
+        computador = new Computador();
+        propiedadesComputador = new HashMap<>();
         sinonimosEstado = new HashMap<String, String[]>();
-        sinonimosEstado.put("apagado", new String[]{"apagado", "no enciende"});
+        sinonimosEstado.put("apagado", new String[]{"apagado", "apagada", "no enciende", "no prende"});
+        sinonimosEstado.put("encendida", new String[]{"encendida", "prendida", ""});
         sinonimosEstado.put("parpadeando", new String[]{"apagado", "no enciende"});//FIXME: Cambiar sinonimos
+        
 
         sinonimosNombresEstado = new HashMap<String, String[]>();
-        sinonimosNombresEstado.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido"});
-
+        
+        sinonimosPartesComputador.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido", "suena"});
         sinonimosPartesComputador = new HashMap<String, String[]>();
         sinonimosPartesComputador.put("pantalla", new String[]{"pantalla", "monitor", "televisor"});
         sinonimosPartesComputador.put("computador", new String[]{"computador", "PC", "CPU", "Ordenador", "Procesador"});
@@ -33,26 +43,23 @@ public class CompararPalabras {
 
     public void desintegrarFrase(String frase) {
         String palabras[] = frase.split(" ");
-        String nombreEstado = null;
-        String estado;
-        Computador computador = new Computador();
+
         for (int indice = 0; indice < palabras.length; indice++) {
             String palabraAnterior = indice > 1 ? palabras[indice - 1] : "";
-            
-            estado = obtenerEstado(palabras[indice], palabraAnterior);
-            obtenerNombreEstado(palabras[indice], nombreEstado);
-            obtenerParteDeComputador(computador, palabras[indice]);
-            
-            if (nombreEstado != null && estado != null) {
-                HashMap<String, String> mapEstado = new HashMap<>();
-                mapEstado.put(nombreEstado, estado);
-                nombreEstado = null;
-                estado = null;
+            String palabraActual = palabras[indice];
+
+            if (palabraActual == "del" || palabraActual == "de") {
+                indice++;
+                palabraAnterior += palabraActual;
+                palabraActual = palabras[indice];
             }
+            obtenerEstado(palabraActual, palabraAnterior);
+            //obtenerNombreEstado(palabraActual, nombreEstado);
+            obtenerParteDeComputador(palabraActual);
         }
     }
 
-    private String obtenerEstado(String palabra, String anterior) {
+    private void obtenerEstado(String palabra, String anterior) {
         double ranking = 0.0;
         for (Map.Entry<String, String[]> arregloSinonimo : sinonimosEstado.entrySet()) {
             for (int i = 0; i < arregloSinonimo.getValue().length; i++) {
@@ -65,10 +72,9 @@ public class CompararPalabras {
                 }
             }
             if (ranking > MINIMO_APROXIMACION) {
-                return arregloSinonimo.getKey();
+                computador.setEstado(arregloSinonimo.getKey());
             }
         }
-        return null;
     }
 
     private String obtenerPalabra(HashMap<String, String[]> entidad, String palabra) {
@@ -90,20 +96,38 @@ public class CompararPalabras {
         return palabraEncontrada;
     }
 
-    private void obtenerParteDeComputador(Computador computador, String palabra) {
+    private void obtenerParteDeComputador(String palabra) {
         String parte = obtenerPalabra(sinonimosPartesComputador, palabra);
-        if (parte.isEmpty()) {
+        if (!parte.isEmpty()) {
             computador.setNombre(parte);
         }
     }
 
-    private void obtenerNombreEstado(String palabra, String nombreEstado) {
+    public List<Computador> convertirEnHashArregloPropiedades(List<Computador> propiedades, StringBuilder respuestaServidor) {
+        if (propiedades == null) {
+            propiedades = new ArrayList<Computador>();
+        }
+        propiedades.add(computador);
+        for (int indicePropiedades = 0; indicePropiedades < propiedades.size(); indicePropiedades++) {
+            Computador propiedadComputador = propiedades.get(indicePropiedades);
+            if (propiedadComputador.getNombre() != null && propiedadComputador.getEstado() != null) {
+                propiedadesComputador.put(propiedadComputador.getNombre(), propiedadComputador.getEstado());
+            }
+        }
+        return propiedades;
+    }
+
+    public String enviarABaseConocimiento() {
+        LaBase baseConocimiento = new LaBase();
+        return baseConocimiento.evaluar(propiedadesComputador);
+    }
+
+    /*private void obtenerNombreEstado(String palabra, String nombreEstado) {
         String parte = obtenerPalabra(sinonimosPartesComputador, palabra);
         if (parte.isEmpty()) {
             nombreEstado = parte;
         }
-    }
-
+    }*/
     public String obtenerFrases(String f1, String f2) {
         String[] s1 = f1.split(" ");
         String[] s2 = f2.split(" ");

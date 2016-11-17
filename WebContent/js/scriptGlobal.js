@@ -1,4 +1,5 @@
 var scriptMensajes = {
+    listaPropiedades: null,
     configurarControles: function () {
         vista = scriptMensajes;
         document.getElementById('btnEnviarMensaje').addEventListener('click', vista.enviarMensajeCliente);
@@ -17,14 +18,15 @@ var scriptMensajes = {
         $.ajax({
             url: 'ActionServlet',
             type: 'POST',
-            data: {mensaje: mensaje.value},
+            data: {mensaje: mensaje.value, listaPropiedades: vista.listaPropiedades},
             success: vista.recibirRespuestaServidor
         });
         mensaje.value = '';
     },
     recibirRespuestaServidor: function (respuesta) {
-        if (respuesta.trim() !== '') {
-            vista.pintarMensaje(respuesta, 'SERVIDOR');
+        vista.listaPropiedades = respuesta.listaPropiedades;
+        if (respuesta.mensaje.trim() !== '') {
+            vista.pintarMensaje(respuesta.mensaje, 'SERVIDOR');
         }
     },
     pintarMensaje: function (mensaje, origen) {

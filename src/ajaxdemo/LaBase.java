@@ -5,6 +5,7 @@ import Rule.Clause;
 import Rule.Condition;
 import Rule.Rule;
 import Rule.RuleVariable;
+import java.util.HashMap;
 
 public class LaBase {
 
@@ -137,24 +138,30 @@ public class LaBase {
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "El_puntero_en_pantalla_no_responde"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
-        
+
     }
 
-    public void evaluar() {
-        this.pantalla.setValue(this.pantalla.askUser());
-        this.sonido.setValue(this.sonido.askUser());
-        this.entorno.setValue(this.entorno.askUser());
-        this.mensajeEnSistema.setValue(this.mensajeEnSistema.askUser());
-        this.raton.setValue(this.raton.askUser());
-        this.teclado.setValue(this.raton.askUser());
+    public String evaluar(HashMap<String, String> componentes) {
+        this.pantalla.setValue(validarExistenciaParametro(componentes, "pantalla"));
+        this.sonido.setValue(validarExistenciaParametro(componentes, "sonido"));
+        this.entorno.setValue(validarExistenciaParametro(componentes, "entorno"));
+        this.mensajeEnSistema.setValue(validarExistenciaParametro(componentes, "mensaje en sistema"));
+        this.raton.setValue(validarExistenciaParametro(componentes, "raton"));
+        this.teclado.setValue(validarExistenciaParametro(componentes, "teclado"));
 
         this.base.forwardChain();
+        return this.falla.getValue();
+    }
 
-        System.out.println(this.falla.getValue());
+    private String validarExistenciaParametro(HashMap<String, String> componentes, String nombreComponente) {
+        if (componentes.containsKey(nombreComponente)) {
+            return componentes.get(nombreComponente);
+        }
+        return "No_es_relevante";
     }
 
     public static void main(String[] args) {
-        new LaBase().evaluar();
+        //new LaBase().evaluar();
 //        new LaBase().evaluar();
     }
 }
