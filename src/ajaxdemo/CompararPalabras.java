@@ -37,6 +37,8 @@ public class CompararPalabras {
         sinonimosEstado.put("No_es_relevante", new String[]{"Está bien", "No hay problemas"});
         //sinonimosEstado.put("Error al cargar el sistema operativo", new String[]{"No carga sistema operativo", "Error al cargar el sistema operativo"});
         sinonimosEstado.put("apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "negra"});
+        sinonimosEstado.put("Si", new String[]{"Si", "si", "correcto", "verdad", "afirmativo"});
+        sinonimosEstado.put("No", new String[]{"No", "no"});
 
         sinonimosPartesComputador.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido", "suena"});
         sinonimosPartesComputador.put("pantalla", new String[]{"pantalla", "monitor", "televisor"});

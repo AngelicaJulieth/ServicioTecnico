@@ -15,15 +15,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @WebServlet("/ActionServlet")
-public class ActionServlet extends HttpServlet {
-
+public class ActionServlet extends HttpServlet {    
+    private static final String sinRespuestas = "No encontramos respuestas ¿puedes especificar más?";
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
             PrintWriter out = response.getWriter();
-            String respuesta = "No encontramos respuestas ¿puedes especificar más?";
+            String respuesta = sinRespuestas;
             Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
             List<Computador> listaPropiedadesConfiguradas = gson.fromJson(request.getParameter("listaPropiedades"), new TypeToken<List<Computador>>() {
             }.getType());
@@ -32,8 +32,7 @@ public class ActionServlet extends HttpServlet {
             Respuesta rta = new Respuesta();
             rta.setMensaje(respuesta);
             rta.setListaPropiedades(listaPropiedadesConfiguradas);
-            
-            validarFrase(mensaje, rta, listaPropiedadesConfiguradas);
+            rta = validarFrase(mensaje, rta, listaPropiedadesConfiguradas);
 
             out.print(gson.toJson(rta));
         } catch (Exception e) {
@@ -41,8 +40,9 @@ public class ActionServlet extends HttpServlet {
         }
     }
 
-    private void validarFrase(String mensaje, Respuesta rta, List<Computador> listaPropiedadesConfiguradas) {
+    private Respuesta validarFrase(String mensaje, Respuesta rta, List<Computador> listaPropiedadesConfiguradas) {
         String respuesta;
+        Computador propiedadPendiente = new Computador();
         CompararPalabras comparacionPalabra = new CompararPalabras();
         if (mensaje.equals("") && !listaPropiedadesConfiguradas.isEmpty()) {
             listaPropiedadesConfiguradas = comparacionPalabra.convertirEnHashArregloLleno(listaPropiedadesConfiguradas);
@@ -51,22 +51,27 @@ public class ActionServlet extends HttpServlet {
             String mensajeSaludo = comparacionPalabra.desintegrarFrase(mensaje);
             if (mensajeSaludo != null) {
                 rta.setMensaje(mensajeSaludo);
-                return;
+                propiedadPendiente.setNombre("problema");
+                propiedadPendiente.setEstado("bool(Si,No)");
+                rta.setObjetoPendiente(propiedadPendiente);
+                return rta;
             }
             listaPropiedadesConfiguradas = comparacionPalabra.convertirEnHashArregloPropiedades(listaPropiedadesConfiguradas);
         }
 
         respuesta = comparacionPalabra.enviarABaseConocimiento();
+        if(respuesta == null){
+            rta.setMensaje(sinRespuestas);
+            return rta;
+        }
         if (respuesta.indexOf("||") > 0) {
             String[] parametros = respuesta.split("||");
-            Computador computador = new Computador();
-            Computador propiedadPendiente = new Computador();
-            computador.setNombre(parametros[1]);
-            computador.setEstado(parametros[2]);
+            propiedadPendiente.setNombre(parametros[1]);
+            propiedadPendiente.setEstado(parametros[2]);
             rta.setMensaje(parametros[0]);
             rta.setObjetoPendiente(propiedadPendiente);
         }
-        return;
+        return rta;
 
     }
 

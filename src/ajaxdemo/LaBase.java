@@ -17,15 +17,21 @@ public class LaBase {
     private RuleVariable mensajeEnSistema = null;
     private RuleVariable raton = null;
     private RuleVariable teclado = null;
+    private RuleVariable computador = null;
+    private RuleVariable problema = null;
 
     //objeto falla
     private RuleVariable falla = null;
 
     public LaBase() {
+        this.problema = new RuleVariable(base, "existe un problema");
+        this.problema.setLabels("Si No");
         //<editor-fold desc="Posibles estados">
         //variables en pantalla
         this.pantalla = new RuleVariable(base, "Estado del monitor");
         this.pantalla.setLabels("Apagado Mesaje_con_la_palabra_boot Parpadeos Encendida No_es_relevante");
+        this.computador = new RuleVariable(base, "Estado del computador");
+        this.computador.setLabels("Apagado Encendida No_es_relevante");
 
         //variables en Sonido
         this.sonido = new RuleVariable(base, "Posibles Sonidos");
@@ -49,7 +55,6 @@ public class LaBase {
 
         this.falla = new RuleVariable(base, "Servivio tecnico dice:");
         //</editor-fold>
-        
         //<editor-fold desc="Base de conocimientos para soporte">
         Condition cond = new Condition("=");
         String errDD1 = "Diagnostico: Se refiere a que los cabezales del lector-escritura, han aterrizado sobre la superficie de los platos.\n"
@@ -141,6 +146,13 @@ public class LaBase {
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
         //</editor-fold>
         //<editor-fold desc="Base de conocimientos para soporte">
+        String ansExisteProblema = "Cuéntame que sucede por favor";
+        Rule mensajeProblema = new Rule(base, "Tiene un problema", new Clause[]{
+            new Clause(problema, cond, "Si")}, new Clause(falla, cond, ansExisteProblema));
+        String ansNoExisteProblema = "En caso de tener algún problema no dudes en escribir";
+        Rule mensajeSinProblema = new Rule(base, "No tiene un problema", new Clause[]{
+            new Clause(problema, cond, "No")}, new Clause(falla, cond, ansNoExisteProblema));
+        
         String ansPantalla = "¿La pantalla está encendida? ||pantalla||bool(encendido,apagado)";
         Rule fallaIncompletaSonido = new Rule(base, "Sólo se sabe del sonido", new Clause[]{
             new Clause(pantalla, cond, "No_es_relevante"),
@@ -150,7 +162,7 @@ public class LaBase {
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansPantalla));
         
-        String ansComputador = "¿Cuál es el estado del computador?";
+        String ansComputador = "¿Cuál es el estado del computador? ||computador||bool(encendido,apagado)";
         Rule fallaIncompletaPantalla = new Rule(base, "Sólo se sabe de la pantalla", new Clause[]{
             new Clause(pantalla, cond, "Apagado"),
             new Clause(sonido, cond, "No_es_relevante"),
@@ -162,6 +174,8 @@ public class LaBase {
     }
 
     public String evaluar(HashMap<String, String> componentes) {
+        this.problema.setValue(validarExistenciaParametro(componentes, "problema"));
+        this.computador.setValue(validarExistenciaParametro(componentes, "computador"));
         this.pantalla.setValue(validarExistenciaParametro(componentes, "pantalla"));
         this.sonido.setValue(validarExistenciaParametro(componentes, "sonido"));
         this.entorno.setValue(validarExistenciaParametro(componentes, "entorno"));

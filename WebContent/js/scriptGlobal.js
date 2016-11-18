@@ -1,5 +1,5 @@
 var scriptMensajes = {
-    listaPropiedades: null,
+    listaPropiedades: [],
     configurarControles: function () {
         vista = scriptMensajes;
         document.getElementById('btnEnviarMensaje').addEventListener('click', vista.enviarMensajeCliente);
@@ -14,7 +14,7 @@ var scriptMensajes = {
         vista.enviarMensajeAServidor();
     },
     enviarMensajeAServidor: function () {
-        var mensaje = vista.validarRespuestaBooleana() + document.getElementById('txtMensaje').value;
+        var mensaje = vista.validarRespuestaBooleana();
         
         $.ajax({
             url: 'ActionServlet',
@@ -25,7 +25,7 @@ var scriptMensajes = {
         document.getElementById('txtMensaje').value = '';
     },
     recibirRespuestaServidor: function (respuesta) {
-        vista.listaPropiedades = respuesta.listaPropiedades;
+        vista.listaPropiedades = respuesta.listaPropiedades ? respuesta.listaPropiedades : [];
         if (respuesta.mensaje.trim() !== '') {
             vista.respuestaServidor = respuesta;
             vista.pintarMensaje(respuesta.mensaje, 'SERVIDOR');
@@ -34,10 +34,10 @@ var scriptMensajes = {
     validarRespuestaBooleana: function () {
         var mensaje = document.getElementById('txtMensaje').value.toLowerCase();
         if(!vista.respuestaServidor){
-            return "";
+            return mensaje;
         }
         var pendiente = vista.respuestaServidor.objetoPendiente;
-        var posiblesEstados = vista.respuestaServidor.estado;
+        var posiblesEstados = pendiente ? pendiente.estado : "";
         if (pendiente && posiblesEstados.startsWith("bool")) {
             var estados = posiblesEstados.substring(0, posiblesEstados.length - 1);
             var afirmativo = mensaje.startsWith("si") || mensaje.startsWith("sí");
@@ -54,7 +54,7 @@ var scriptMensajes = {
             }
             return pendiente.nombre; 
         }
-        return "";
+        return mensaje;
     },
     pintarMensaje: function (mensaje, origen) {
         var orientacion = origen === 'SERVIDOR' ? 'left' : 'right';
