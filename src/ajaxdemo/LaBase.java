@@ -22,7 +22,7 @@ public class LaBase {
     private RuleVariable falla = null;
 
     public LaBase() {
-
+        //<editor-fold desc="Posibles estados">
         //variables en pantalla
         this.pantalla = new RuleVariable(base, "Estado del monitor");
         this.pantalla.setLabels("Apagado Mesaje_con_la_palabra_boot Parpadeos Encendida No_es_relevante");
@@ -48,9 +48,10 @@ public class LaBase {
         this.teclado.setLabels("EL_teclado_no_responde");
 
         this.falla = new RuleVariable(base, "Servivio tecnico dice:");
-
+        //</editor-fold>
+        
+        //<editor-fold desc="Base de conocimientos para soporte">
         Condition cond = new Condition("=");
-
         String errDD1 = "Diagnostico: Se refiere a que los cabezales del lector-escritura, han aterrizado sobre la superficie de los platos.\n"
                 + "Solucion: Para este caso no hay solución, sólo reemplazarlo por otro disco duro.";
 
@@ -138,7 +139,26 @@ public class LaBase {
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "El_puntero_en_pantalla_no_responde"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
-
+        //</editor-fold>
+        //<editor-fold desc="Base de conocimientos para soporte">
+        String ansPantalla = "¿Cuál es el estado de la pantalla?";
+        Rule fallaIncompletaSonido = new Rule(base, "Sólo se sabe del sonido", new Clause[]{
+            new Clause(pantalla, cond, "No_es_relevante"),
+            new Clause(sonido, cond, "Sonido_metalico_en_CPU"),
+            new Clause(entorno, cond, "No_es_relevante"),
+            new Clause(mensajeEnSistema, cond, "No_es_relevante"),
+            new Clause(raton, cond, "No_es_relevante"),
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansPantalla));
+        
+        String ansComputador = "¿Cuál es el estado del computador?";
+        Rule fallaIncompletaPantalla = new Rule(base, "Sólo se sabe de la pantalla", new Clause[]{
+            new Clause(pantalla, cond, "Apagado"),
+            new Clause(sonido, cond, "No_es_relevante"),
+            new Clause(entorno, cond, "No_es_relevante"),
+            new Clause(mensajeEnSistema, cond, "No_es_relevante"),
+            new Clause(raton, cond, "No_es_relevante"),
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansComputador));
+        //</editor-fold>
     }
 
     public String evaluar(HashMap<String, String> componentes) {

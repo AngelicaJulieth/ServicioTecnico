@@ -16,62 +16,96 @@ public class CompararPalabras {
     private double MINIMO_APROXIMACION = 0.7;
     private HashMap<String, String[]> sinonimosEstado;
     private HashMap<String, String[]> sinonimosNombresEstado;
+    private String[] sinonimosSaludos;
     private HashMap<String, String[]> sinonimosPartesComputador;
     private Computador computador;
     private HashMap<String, String> propiedadesComputador;
     //private List<Computador> partesComputador;
 
     public void inicializarVariables() {
+        computador = new Computador();
         jaroWinkler = new JaroWinkler();
+        sinonimosEstado = new HashMap<String, String[]>();
+        sinonimosNombresEstado = new HashMap<String, String[]>();
+        sinonimosPartesComputador = new HashMap<String, String[]>();
+        sinonimosSaludos = new String[]{"hola", "buenos días", "buenos dias", "buenas noches", "buenas tardes", "buen día", "buenas"};
 
         //  partesComputador = new ArrayList<Computador>();
-        computador = new Computador();
         propiedadesComputador = new HashMap<>();
-        sinonimosEstado = new HashMap<String, String[]>();
-        sinonimosEstado.put("apagado", new String[]{"apagado", "apagada", "no enciende", "no prende"});
-        sinonimosEstado.put("encendida", new String[]{"encendida", "prendida", ""});
         sinonimosEstado.put("parpadeando", new String[]{"apagado", "no enciende"});//FIXME: Cambiar sinonimos
-        
+        sinonimosEstado.put("encendida", new String[]{"encendida", "prendida", ""});
+        sinonimosEstado.put("No_es_relevante", new String[]{"Está bien", "No hay problemas"});
+        //sinonimosEstado.put("Error al cargar el sistema operativo", new String[]{"No carga sistema operativo", "Error al cargar el sistema operativo"});
+        sinonimosEstado.put("apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "negra"});
 
-        sinonimosNombresEstado = new HashMap<String, String[]>();
-        
         sinonimosPartesComputador.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido", "suena"});
-        sinonimosPartesComputador = new HashMap<String, String[]>();
         sinonimosPartesComputador.put("pantalla", new String[]{"pantalla", "monitor", "televisor"});
-        sinonimosPartesComputador.put("computador", new String[]{"computador", "PC", "CPU", "Ordenador", "Procesador"});
+        sinonimosPartesComputador.put("computador", new String[]{"computador", "PC", "CPU", "ordenador", "procesador"});
+        sinonimosPartesComputador.put("mensaje", new String[]{"letrero", "aviso", "nota", "anuncio", "notificacion", "señal", "advertencia", "consejo", "indicacion", "comunicado", "observacion", "noticia", "sugerencia"});
     }
 
-    public void desintegrarFrase(String frase) {
+    public String desintegrarFrase(String frase) {
         String palabras[] = frase.split(" ");
 
         for (int indice = 0; indice < palabras.length; indice++) {
             String palabraAnterior = indice > 1 ? palabras[indice - 1] : "";
             String palabraActual = palabras[indice];
-
+            Boolean esSaludo = obtenerSaludos(palabraActual, palabraAnterior);
+            if (esSaludo) {
+                return "Buen día, ¿Tienes algún problema con tu computador?";
+            }
+            if (palabraActual.toLowerCase() == "mi") {
+                continue;
+            }
             if (palabraActual == "del" || palabraActual == "de") {
                 indice++;
                 palabraAnterior += palabraActual;
                 palabraActual = palabras[indice];
             }
-            obtenerEstado(palabraActual, palabraAnterior);
+            obtenerEstado(palabraActual, palabraAnterior, frase);
             //obtenerNombreEstado(palabraActual, nombreEstado);
             obtenerParteDeComputador(palabraActual);
         }
+        return null;
     }
 
-    private void obtenerEstado(String palabra, String anterior) {
+    private Boolean obtenerSaludos(String palabra, String anterior) {
         double ranking = 0.0;
-        for (Map.Entry<String, String[]> arregloSinonimo : sinonimosEstado.entrySet()) {
-            for (int i = 0; i < arregloSinonimo.getValue().length; i++) {
-                String sinonimo = arregloSinonimo.getValue()[i];
-                String palabraCombinada = sinonimo.split(" ").length > 1 ? anterior + palabra : palabra;
 
-                double presicionPalabra = jaroWinkler.similarity(sinonimo, palabraCombinada);
+        for (String saludo : sinonimosSaludos) {
+            String palabraCombinada = saludo.split(" ").length > 1 ? anterior + palabra : palabra;
+
+            double presicionPalabra = jaroWinkler.similarity(saludo, palabraCombinada);
+            if (ranking < presicionPalabra) {
+                ranking = presicionPalabra;
+            }
+        }
+        return ranking > MINIMO_APROXIMACION;
+    }
+
+    private void obtenerEstado(String palabra, String anterior, String frase) {
+        double rankingMayor = 0d;
+        for (Map.Entry<String, String[]> arregloSinonimo : sinonimosEstado.entrySet()) {
+            double ranking = 0.0;
+            for (int i = 0; i < arregloSinonimo.getValue().length; i++) {
+                double presicionPalabra = 0d;
+                String palabraCombinada = palabra;
+                String sinonimo = arregloSinonimo.getValue()[i];
+                int cantidadPalabras = sinonimo.split(" ").length;
+
+                if (cantidadPalabras > 3) {
+                    palabraCombinada = frase;
+                } else {
+                    palabraCombinada = anterior + palabra;
+                }
+
+                presicionPalabra = jaroWinkler.similarity(sinonimo, palabraCombinada);
                 if (ranking < presicionPalabra) {
                     ranking = presicionPalabra;
                 }
             }
-            if (ranking > MINIMO_APROXIMACION) {
+            if (ranking > MINIMO_APROXIMACION && ranking > rankingMayor) {
+                rankingMayor = ranking;
                 computador.setEstado(arregloSinonimo.getKey());
             }
         }

@@ -27,30 +27,39 @@ public class ActionServlet extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Double similitud = 0d;
-        jaroWinkler = new JaroWinkler();
-        PrintWriter out = response.getWriter();
-        StringBuilder respuesta = new StringBuilder("La respuesta es: ");
-        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-        List<Computador> listaPropiedadesConfiguradas = gson.fromJson(request.getParameter("listaPropiedades"), new TypeToken<List<Computador>>() {
-        }.getType());
-        response.setContentType("application/json");
-        String mensaje = request.getParameter("mensaje");
-        similitud = jaroWinkler.similarity("no está encendido", "enciende");
-        respuesta.append(similitud.toString());
+        try {
 
-        if (!mensaje.equals("")) {
-            CompararPalabras comparacionPalabra = new CompararPalabras();
-            comparacionPalabra.inicializarVariables();
-            comparacionPalabra.desintegrarFrase(mensaje);
-            listaPropiedadesConfiguradas = comparacionPalabra.convertirEnHashArregloPropiedades(listaPropiedadesConfiguradas, respuesta);
-            respuesta = new StringBuilder(comparacionPalabra.enviarABaseConocimiento());
+            Double similitud = 0d;
+            jaroWinkler = new JaroWinkler();
+            PrintWriter out = response.getWriter();
+            StringBuilder respuesta = new StringBuilder("La respuesta es: ");
+            Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+            List<Computador> listaPropiedadesConfiguradas = gson.fromJson(request.getParameter("listaPropiedades"), new TypeToken<List<Computador>>() {
+            }.getType());
+            response.setContentType("application/json");
+            String mensaje = request.getParameter("mensaje");
+            similitud = jaroWinkler.similarity("no está encendido", "enciende");
+            respuesta.append(similitud.toString());
+
+            if (!mensaje.equals("")) {
+                CompararPalabras comparacionPalabra = new CompararPalabras();
+                comparacionPalabra.inicializarVariables();
+                String mensajeSaludo = comparacionPalabra.desintegrarFrase(mensaje);
+                if (mensajeSaludo == null) {
+                    listaPropiedadesConfiguradas = comparacionPalabra.convertirEnHashArregloPropiedades(listaPropiedadesConfiguradas, respuesta);
+                    respuesta = new StringBuilder(comparacionPalabra.enviarABaseConocimiento());
+                } else {
+                    respuesta = new StringBuilder(mensajeSaludo);
+                }
+            }
+            Respuesta rta = new Respuesta();
+            rta.setMensaje(respuesta.toString());
+            rta.setListaPropiedades(listaPropiedadesConfiguradas);
+
+            out.print(gson.toJson(rta));
+        } catch (Exception e) {
+            
         }
-        Respuesta rta = new Respuesta();
-        rta.setMensaje(respuesta.toString());
-        rta.setListaPropiedades(listaPropiedadesConfiguradas);
-
-        out.print(gson.toJson(rta));
     }
 
 }
