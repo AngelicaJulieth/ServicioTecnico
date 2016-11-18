@@ -11,6 +11,7 @@ public class Respuesta {
 
     private String mensaje;
     private List<Computador> listaPropiedades;
+    private Computador objetoPendiente;
 
     public String getMensaje() {
         return mensaje;
@@ -27,5 +28,14 @@ public class Respuesta {
     public void setListaPropiedades(List<Computador> listaPropiedades) {
         this.listaPropiedades = listaPropiedades;
     }
+
+    public Computador getObjetoPendiente() {
+        return objetoPendiente;
+    }
+
+    public void setObjetoPendiente(Computador objetoPendiente) {
+        this.objetoPendiente = objetoPendiente;
+    }
+
 
 }

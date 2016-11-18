@@ -3,7 +3,7 @@ var scriptMensajes = {
     configurarControles: function () {
         vista = scriptMensajes;
         document.getElementById('btnEnviarMensaje').addEventListener('click', vista.enviarMensajeCliente);
-        vista.pintarMensaje('Hola, ¿En qué te puedo ayudar?', 'SERVIDOR');
+        vista.pintarMensaje('Bienvenido a servicio técnico', 'SERVIDOR');
     },
     enviarMensajeCliente: function () {
         var mensaje = document.getElementById('txtMensaje').value;
@@ -14,20 +14,47 @@ var scriptMensajes = {
         vista.enviarMensajeAServidor();
     },
     enviarMensajeAServidor: function () {
-        var mensaje = document.getElementById('txtMensaje');
+        var mensaje = vista.validarRespuestaBooleana() + document.getElementById('txtMensaje').value;
+        
         $.ajax({
             url: 'ActionServlet',
             type: 'POST',
-            data: {mensaje: mensaje.value, listaPropiedades: vista.listaPropiedades},
+            data: {mensaje: mensaje, listaPropiedades: vista.listaPropiedades},
             success: vista.recibirRespuestaServidor
         });
-        mensaje.value = '';
+        document.getElementById('txtMensaje').value = '';
     },
     recibirRespuestaServidor: function (respuesta) {
         vista.listaPropiedades = respuesta.listaPropiedades;
         if (respuesta.mensaje.trim() !== '') {
+            vista.respuestaServidor = respuesta;
             vista.pintarMensaje(respuesta.mensaje, 'SERVIDOR');
         }
+    },
+    validarRespuestaBooleana: function () {
+        var mensaje = document.getElementById('txtMensaje').value.toLowerCase();
+        if(!vista.respuestaServidor){
+            return "";
+        }
+        var pendiente = vista.respuestaServidor.objetoPendiente;
+        var posiblesEstados = vista.respuestaServidor.estado;
+        if (pendiente && posiblesEstados.startsWith("bool")) {
+            var estados = posiblesEstados.substring(0, posiblesEstados.length - 1);
+            var afirmativo = mensaje.startsWith("si") || mensaje.startsWith("sí");
+            var negativo = mensaje.startsWith("no");
+            estados = posiblesEstados.split("(")[1];
+            
+            if(afirmativo){
+                vista.listaPropiedades.push({nombre: pendiente.nombre, estado: estados.split(",")[0]});
+                return "";
+            }
+            if(negativo){
+                vista.listaPropiedades.push({nombre: pendiente.nombre, estado: estados.split(",")[1]});
+                return "";
+            }
+            return pendiente.nombre; 
+        }
+        return "";
     },
     pintarMensaje: function (mensaje, origen) {
         var orientacion = origen === 'SERVIDOR' ? 'left' : 'right';

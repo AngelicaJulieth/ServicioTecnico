@@ -141,7 +141,7 @@ public class LaBase {
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
         //</editor-fold>
         //<editor-fold desc="Base de conocimientos para soporte">
-        String ansPantalla = "¿Cuál es el estado de la pantalla?";
+        String ansPantalla = "¿La pantalla está encendida? ||pantalla||bool(encendido,apagado)";
         Rule fallaIncompletaSonido = new Rule(base, "Sólo se sabe del sonido", new Clause[]{
             new Clause(pantalla, cond, "No_es_relevante"),
             new Clause(sonido, cond, "Sonido_metalico_en_CPU"),

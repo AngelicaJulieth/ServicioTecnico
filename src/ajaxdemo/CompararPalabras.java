@@ -137,11 +137,20 @@ public class CompararPalabras {
         }
     }
 
-    public List<Computador> convertirEnHashArregloPropiedades(List<Computador> propiedades, StringBuilder respuestaServidor) {
+    public List<Computador> convertirEnHashArregloPropiedades(List<Computador> propiedades) {
         if (propiedades == null) {
             propiedades = new ArrayList<Computador>();
         }
         propiedades.add(computador);
+        for (int indicePropiedades = 0; indicePropiedades < propiedades.size(); indicePropiedades++) {
+            Computador propiedadComputador = propiedades.get(indicePropiedades);
+            if (propiedadComputador.getNombre() != null && propiedadComputador.getEstado() != null) {
+                propiedadesComputador.put(propiedadComputador.getNombre(), propiedadComputador.getEstado());
+            }
+        }
+        return propiedades;
+    }
+    public List<Computador> convertirEnHashArregloLleno(List<Computador> propiedades) {
         for (int indicePropiedades = 0; indicePropiedades < propiedades.size(); indicePropiedades++) {
             Computador propiedadComputador = propiedades.get(indicePropiedades);
             if (propiedadComputador.getNombre() != null && propiedadComputador.getEstado() != null) {
