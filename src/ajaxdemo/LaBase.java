@@ -177,7 +177,7 @@ public class LaBase {
             new Clause(raton, cond, "El_puntero_en_pantalla_no_responde"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
         //</editor-fold>
-        //<editor-fold desc="Base de conocimientos para soporte" defaultstate="collapsed">
+        //<editor-fold desc="Describe en caso de tener problemas o no" defaultstate="collapsed">
         String ansExisteProblema = "Cuéntame que sucede por favor";
         Rule mensajeProblema = new Rule(base, "Tiene un problema", new Clause[]{
             new Clause(problema, cond, "Si")}, new Clause(falla, cond, ansExisteProblema));
