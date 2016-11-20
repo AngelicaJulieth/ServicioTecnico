@@ -32,7 +32,7 @@ public class LaBase {
         this.verificacion = new RuleVariable(base, "Resultado de un consejo de verificación");
         this.verificacion.setLabels("Si No");
 
-        //<editor-fold desc="Posibles estados" defaultstatus="collapsed">
+        //<editor-fold desc="Posibles estados" defaultstate="collapsed">
         //variables en pantalla
         this.pantalla = new RuleVariable(base, "Estado del monitor");
         this.pantalla.setLabels("Apagado Mesaje_con_la_palabra_boot Parpadeos Encendida No_es_relevante");
@@ -63,7 +63,7 @@ public class LaBase {
 
         this.falla = new RuleVariable(base, "Servivio tecnico dice:");
         //</editor-fold>
-        //<editor-fold desc="Base de conocimientos para soporte" defaultstatus="collapsed">
+        //<editor-fold desc="Base de conocimientos para soporte" defaultstate="collapsed">
         Condition cond = new Condition("=");
         String errDD1 = "Diagnostico: Se refiere a que los cabezales del lector-escritura, han aterrizado sobre la superficie de los platos.\n"
                 + "Solucion: Para este caso no hay solución, sólo reemplazarlo por otro disco duro.";
@@ -177,7 +177,7 @@ public class LaBase {
             new Clause(raton, cond, "El_puntero_en_pantalla_no_responde"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
         //</editor-fold>
-        //<editor-fold desc="Base de conocimientos para soporte">
+        //<editor-fold desc="Base de conocimientos para soporte" defaultstate="collapsed">
         String ansExisteProblema = "Cuéntame que sucede por favor";
         Rule mensajeProblema = new Rule(base, "Tiene un problema", new Clause[]{
             new Clause(problema, cond, "Si")}, new Clause(falla, cond, ansExisteProblema));
