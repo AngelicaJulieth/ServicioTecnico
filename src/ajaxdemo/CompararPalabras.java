@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 public class CompararPalabras {
 
+    //<editor-fold desc="Variables de la clase" defaultstatus="collapsed">
     private FreeLingCliente free;
     private JaroWinkler jaroWinkler;
     private double MINIMO_APROXIMACION = 0.7;
@@ -22,6 +23,7 @@ public class CompararPalabras {
     private HashMap<String, String> propiedadesComputador;
     //private List<Computador> partesComputador;
 
+    //</editor-fold>
     public void inicializarVariables() {
         computador = new Computador();
         jaroWinkler = new JaroWinkler();
@@ -32,11 +34,12 @@ public class CompararPalabras {
 
         //  partesComputador = new ArrayList<Computador>();
         propiedadesComputador = new HashMap<>();
-        sinonimosEstado.put("parpadeando", new String[]{"apagado", "no enciende"});//FIXME: Cambiar sinonimos
-        sinonimosEstado.put("encendida", new String[]{"encendida", "prendida", ""});
-        sinonimosEstado.put("No_es_relevante", new String[]{"Está bien", "No hay problemas"});
+        sinonimosEstado.put("Reiniciando", new String[]{"se reinicia", "se apaga y prende nuevamente"});//FIXME: Cambiar sinonimos
+        sinonimosEstado.put("Parpadeos", new String[]{"prende y apaga", "parpadea"});//FIXME: Cambiar sinonimos
+        sinonimosEstado.put("Encendida", new String[]{"encendida", "prendida", ""});
+        sinonimosEstado.put("No_es_relevante", new String[]{"está bien", "no hay problemas"});
         //sinonimosEstado.put("Error al cargar el sistema operativo", new String[]{"No carga sistema operativo", "Error al cargar el sistema operativo"});
-        sinonimosEstado.put("apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "negra"});
+        sinonimosEstado.put("Apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "esta negra"});
         sinonimosEstado.put("Si", new String[]{"Si", "si", "correcto", "verdad", "afirmativo"});
         sinonimosEstado.put("No", new String[]{"No", "no"});
 
@@ -51,15 +54,16 @@ public class CompararPalabras {
 
         for (int indice = 0; indice < palabras.length; indice++) {
             String palabraAnterior = indice > 1 ? palabras[indice - 1] : "";
-            String palabraActual = palabras[indice];
+            String palabraActual = palabras[indice].toLowerCase();
+            palabraAnterior = palabraAnterior.toLowerCase();
             Boolean esSaludo = obtenerSaludos(palabraActual, palabraAnterior);
-            if (esSaludo) {
+            if (esSaludo && !palabraActual.toLowerCase().equals("no")) {
                 return "Buen día, ¿Tienes algún problema con tu computador?";
             }
-            if (palabraActual.toLowerCase() == "mi") {
+            if (palabraActual.equals("mi") || palabraActual.equals("no") || palabraActual.equals("el") || palabraActual.equals("la")) {
                 continue;
             }
-            if (palabraActual == "del" || palabraActual == "de") {
+            if (palabraActual.equals("del") || palabraActual.equals("de")) {
                 indice++;
                 palabraAnterior += palabraActual;
                 palabraActual = palabras[indice];
@@ -95,10 +99,15 @@ public class CompararPalabras {
                 String sinonimo = arregloSinonimo.getValue()[i];
                 int cantidadPalabras = sinonimo.split(" ").length;
 
-                if (cantidadPalabras > 3) {
+                if (cantidadPalabras > 2) {
                     palabraCombinada = frase;
+                    if (sinonimo.indexOf(frase) > -1) {
+                        rankingMayor = 1d;
+                        computador.setEstado(arregloSinonimo.getKey());
+                        continue;
+                    }
                 } else {
-                    palabraCombinada = anterior + palabra;
+                    palabraCombinada = anterior + " " + palabra;
                 }
 
                 presicionPalabra = jaroWinkler.similarity(sinonimo, palabraCombinada);
@@ -114,9 +123,10 @@ public class CompararPalabras {
     }
 
     private String obtenerPalabra(HashMap<String, String[]> entidad, String palabra) {
-        double ranking = 0.0;
+        double rankingMayor = 0d;
         String palabraEncontrada = "";
         for (Map.Entry<String, String[]> arregloSinonimo : entidad.entrySet()) {
+            double ranking = 0.0;
             for (int i = 0; i < arregloSinonimo.getValue().length; i++) {
                 String sinonimo = arregloSinonimo.getValue()[i];
                 double presicionPalabra = jaroWinkler.similarity(sinonimo, palabra);
@@ -124,9 +134,9 @@ public class CompararPalabras {
                     ranking = presicionPalabra;
                 }
             }
-            if (ranking > MINIMO_APROXIMACION) {
+            if (ranking > MINIMO_APROXIMACION && ranking > rankingMayor) {
+                rankingMayor = ranking;
                 palabraEncontrada = arregloSinonimo.getKey();
-                return palabraEncontrada;
             }
         }
         return palabraEncontrada;
@@ -143,7 +153,9 @@ public class CompararPalabras {
         if (propiedades == null) {
             propiedades = new ArrayList<Computador>();
         }
-        propiedades.add(computador);
+        if (computador.getEstado() != null && computador.getNombre() != null) {
+            propiedades.add(computador);
+        }
         for (int indicePropiedades = 0; indicePropiedades < propiedades.size(); indicePropiedades++) {
             Computador propiedadComputador = propiedades.get(indicePropiedades);
             if (propiedadComputador.getNombre() != null && propiedadComputador.getEstado() != null) {
@@ -152,6 +164,7 @@ public class CompararPalabras {
         }
         return propiedades;
     }
+
     public List<Computador> convertirEnHashArregloLleno(List<Computador> propiedades) {
         for (int indicePropiedades = 0; indicePropiedades < propiedades.size(); indicePropiedades++) {
             Computador propiedadComputador = propiedades.get(indicePropiedades);

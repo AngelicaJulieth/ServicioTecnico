@@ -2,6 +2,7 @@ var scriptMensajes = {
     listaPropiedades: [],
     configurarControles: function () {
         vista = scriptMensajes;
+        document.getElementById('txtMensaje').addEventListener('keypress', vista.validarTeclaEnterEnviar);
         document.getElementById('btnEnviarMensaje').addEventListener('click', vista.enviarMensajeCliente);
         vista.pintarMensaje('Bienvenido a servicio técnico', 'SERVIDOR');
     },
@@ -13,13 +14,23 @@ var scriptMensajes = {
         vista.pintarMensaje(mensaje, 'CLIENTE');
         vista.enviarMensajeAServidor();
     },
+    validarTeclaEnterEnviar: function (e) {
+        if (e.which == 13 || e.keyCode == 13) {
+            vista.enviarMensajeCliente();
+        }
+    },
     enviarMensajeAServidor: function () {
         var mensaje = vista.validarRespuestaBooleana();
-        
+        var objetoEnviar = {
+            mensaje: mensaje,
+            listaPropiedades: JSON.stringify(vista.listaPropiedades),
+            objetoPendiente: JSON.stringify(vista.respuestaServidor ? vista.respuestaServidor.objetoPendiente : null)
+        };
+
         $.ajax({
             url: 'ActionServlet',
             type: 'POST',
-            data: {mensaje: mensaje, listaPropiedades: vista.listaPropiedades},
+            data: objetoEnviar,
             success: vista.recibirRespuestaServidor
         });
         document.getElementById('txtMensaje').value = '';
@@ -33,26 +44,32 @@ var scriptMensajes = {
     },
     validarRespuestaBooleana: function () {
         var mensaje = document.getElementById('txtMensaje').value.toLowerCase();
-        if(!vista.respuestaServidor){
+        if (!vista.respuestaServidor) {
             return mensaje;
         }
         var pendiente = vista.respuestaServidor.objetoPendiente;
         var posiblesEstados = pendiente ? pendiente.estado : "";
         if (pendiente && posiblesEstados.startsWith("bool")) {
             var estados = posiblesEstados.substring(0, posiblesEstados.length - 1);
-            var afirmativo = mensaje.startsWith("si") || mensaje.startsWith("sí");
-            var negativo = mensaje.startsWith("no");
+            var afirmativo = mensaje.startsWith("si") || mensaje.startsWith("sí") || mensaje.startsWith("Si") || mensaje.startsWith("Sí");
+            var negativo = mensaje.startsWith("no") || mensaje.startsWith("No");
             estados = posiblesEstados.split("(")[1];
-            
-            if(afirmativo){
+            estados = estados.substring(0, estados.length -1);
+
+            if (afirmativo) {
                 vista.listaPropiedades.push({nombre: pendiente.nombre, estado: estados.split(",")[0]});
                 return "";
             }
-            if(negativo){
-                vista.listaPropiedades.push({nombre: pendiente.nombre, estado: estados.split(",")[1]});
+            if (negativo) {
+                var negacion = estados.split(",")[1].indexOf("verificacion");
+                if (negacion !== -1) {
+                    vista.listaPropiedades.push({nombre: "verificacion", estado: "No"});
+                }else{
+                    vista.listaPropiedades.push({nombre: pendiente.nombre, estado: estados.split(",")[1]});
+                }
                 return "";
             }
-            return pendiente.nombre; 
+            return pendiente.nombre + " " + mensaje;
         }
         return mensaje;
     },
