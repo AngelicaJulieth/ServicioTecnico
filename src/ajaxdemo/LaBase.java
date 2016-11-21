@@ -55,7 +55,7 @@ public class LaBase {
 
         //estado del raton
         this.raton = new RuleVariable(base, "Estado del raton");
-        this.raton.setLabels("El_puntero_en_pantalla_no_responde No_es_relevante");
+        this.raton.setLabels("El_puntero_en_pantalla_no_responde Apagado No_es_relevante");
 
         //estado del teclado
         this.teclado = new RuleVariable(base, "Estado del teclado No_es_relevante");
@@ -183,6 +183,7 @@ public class LaBase {
         Rule mensajeSinProblema = new Rule(base, "No tiene un problema", new Clause[]{
             new Clause(problema, cond, "No")}, new Clause(falla, cond, ansNoExisteProblema));
         //</editor-fold>
+        
         String ansPantalla = "¿La pantalla está encendida? --pantalla--bool(Encendido,Apagado)";
         Rule fallaIncompletaSonido = new Rule(base, "Sólo se sabe del sonido", new Clause[]{
             new Clause(pantalla, cond, "No_es_relevante"),
@@ -219,6 +220,7 @@ public class LaBase {
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansEncenderPC));
+        
         String ansFuenteCable = "Verifica que los cables que conectan al computador y a la corriente estén bien ¿Te funcionó?--problema--bool(No, verificacion No)";
         Rule fallaFuenteCable = new Rule(base, "El computador está prendido", new Clause[]{
             new Clause(pantalla, cond, "Apagado"),
@@ -229,7 +231,8 @@ public class LaBase {
             new Clause(entorno, cond, "No_es_relevante"),
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "No_es_relevante"),
-            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansEncenderPC));
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansFuenteCable));
+       
         String ansTarjetaVideo = "Verifica que la ram esté limpia e intenta nuevamente, sino funciona es necesario cambiar la tarjeta de vídeo--limpiarInformacion";
         Rule fallaVerificarComputador = new Rule(base, "No funcionó al prender el computador", new Clause[]{
             new Clause(pantalla, cond, "Apagado"),
@@ -252,6 +255,25 @@ public class LaBase {
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansTarjetaVideo));
         //</editor-fold>
+        
+        
+        //samb
+        //
+      String ansRaton = "Recuerda que el ratón o mouse debe estar conectado en el puerto de color verde,en caso que sea de entrada USB intente conectarlo en otro puerto ¿Te funcionó?--raton--bool(Apagado)";
+        Rule fallaRaton = new Rule(base, "El computador está prendido", new Clause[]{
+            new Clause(pantalla, cond, "No_es_relevante"),
+            new Clause(computador, cond, "No_es_relevante"),
+            new Clause(verificacion, cond, "No_es_relevante"),
+            new Clause(problema, cond, "No_es_relevante"),
+            new Clause(sonido, cond, "No_es_relevante"),
+            new Clause(entorno, cond, "No_es_relevante"),
+            new Clause(mensajeEnSistema, cond, "No_es_relevante"),
+            new Clause(raton, cond, "Apagado"),
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansRaton));
+          
+        
+        
+        
     }
 
     public String evaluar(HashMap<String, String> componentes) {

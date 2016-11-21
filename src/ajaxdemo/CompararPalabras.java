@@ -14,7 +14,9 @@ public class CompararPalabras {
     //<editor-fold desc="Variables de la clase" defaultstatus="collapsed">
     private FreeLingCliente free;
     private JaroWinkler jaroWinkler;
-    private double MINIMO_APROXIMACION = 0.7;
+    private double MINIMO_APROXIMACION = 0.8;
+    private double rankingMayorEstado = 0d;
+    private double rankingMayorParteComputador = 0d;
     private HashMap<String, String[]> sinonimosEstado;
     private HashMap<String, String[]> sinonimosNombresEstado;
     private String[] sinonimosSaludos;
@@ -42,10 +44,12 @@ public class CompararPalabras {
         sinonimosEstado.put("No_es_relevante", new String[]{"está bien", "no hay problema"});
         sinonimosEstado.put("Error al cargar el sistema operativo", new String[]{"no carga sistema operativo", "Error al cargar el sistema operativo"});
         sinonimosEstado.put("Poca_memoria_cierre_programas", new String[]{"memoria insuficiente", "cierre programas"});
-        sinonimosEstado.put("Apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "esta negra"});
+        sinonimosEstado.put("Apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "esta negra", "no funciona", "no se mueve"});
         sinonimosEstado.put("Si", new String[]{"Si", "si", "correcto", "verdad", "afirmativo"});
         sinonimosEstado.put("No", new String[]{"No", "no"});
 
+        
+        sinonimosPartesComputador.put("raton",new String[]{"mouse","raton"});
         sinonimosPartesComputador.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido", "suena"});
         sinonimosPartesComputador.put("pantalla", new String[]{"pantalla", "monitor", "televisor"});
         sinonimosPartesComputador.put("computador", new String[]{"computador", "PC", "CPU", "ordenador", "procesador"});
@@ -102,7 +106,6 @@ public class CompararPalabras {
     }
 
     private void obtenerEstado(String palabra, String anterior, String frase) {
-        double rankingMayor = 0d;
         for (Map.Entry<String, String[]> arregloSinonimo : sinonimosEstado.entrySet()) {
             double ranking = 0.0;
             for (int i = 0; i < arregloSinonimo.getValue().length; i++) {
@@ -114,7 +117,7 @@ public class CompararPalabras {
                 if (cantidadPalabras > 2) {
                     palabraCombinada = frase;
                     if (sinonimo.indexOf(frase) > -1) {
-                        rankingMayor = 1d;
+                        rankingMayorEstado = 1d;
                         computador.setEstado(arregloSinonimo.getKey());
                         continue;
                     }
@@ -127,15 +130,14 @@ public class CompararPalabras {
                     ranking = presicionPalabra;
                 }
             }
-            if (ranking > MINIMO_APROXIMACION && ranking > rankingMayor) {
-                rankingMayor = ranking;
+            if (ranking > MINIMO_APROXIMACION && ranking > rankingMayorEstado) {
+                rankingMayorEstado = ranking;
                 computador.setEstado(arregloSinonimo.getKey());
             }
         }
     }
 
     private String obtenerPalabra(HashMap<String, String[]> entidad, String palabra) {
-        double rankingMayor = 0d;
         String palabraEncontrada = "";
         for (Map.Entry<String, String[]> arregloSinonimo : entidad.entrySet()) {
             double ranking = 0.0;
@@ -146,8 +148,8 @@ public class CompararPalabras {
                     ranking = presicionPalabra;
                 }
             }
-            if (ranking > MINIMO_APROXIMACION && ranking > rankingMayor) {
-                rankingMayor = ranking;
+            if (ranking > MINIMO_APROXIMACION && ranking > rankingMayorParteComputador) {
+                rankingMayorParteComputador = ranking;
                 palabraEncontrada = arregloSinonimo.getKey();
             }
         }
