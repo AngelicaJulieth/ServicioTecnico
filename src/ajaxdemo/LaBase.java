@@ -59,7 +59,7 @@ public class LaBase {
 
         //estado del teclado
         this.teclado = new RuleVariable(base, "Estado del teclado No_es_relevante");
-        this.teclado.setLabels("EL_teclado_no_responde");
+        this.teclado.setLabels("El_teclado_no_responde");
 
         this.falla = new RuleVariable(base, "Servivio tecnico dice:");
         //</editor-fold>
@@ -121,11 +121,9 @@ public class LaBase {
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
 
-        String errMemRAM1 = "Diagnostico:Lo más probable es que el equipo se encuentre infectado de virus y está generando procesos que hacen que se ocupe el espacio de memoria al máximo.\n"
-                + "Solucion: Instalar un antivirus y mantenlo actualizado.";
-
+        String errMemRAM1 = "Esto sucede porque la memoria RAM no tiene la capacidad que exiges, la mejor solución sería comprar una memoria RAM o utilizar pendrive que 'ayude' la ram";
         Rule fallaMemRAM1 = new Rule(base, "Falla en la memoria RAM", new Clause[]{
-            new Clause(pantalla, cond, "Encendida"),
+            new Clause(pantalla, cond, "No_es_relevante"),
             new Clause(verificacion, cond, "No_es_relevante"),
             new Clause(computador, cond, "No_es_relevante"),
             new Clause(problema, cond, "No_es_relevante"),
@@ -133,7 +131,7 @@ public class LaBase {
             new Clause(entorno, cond, "No_es_relevante"),
             new Clause(mensajeEnSistema, cond, "Poca_memoria_cierre_programas"),
             new Clause(raton, cond, "No_es_relevante"),
-            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errMemRAM1));
 
         String errMemRAM2 = "Diagnostico:Error de memoria RAM, lo normal es que esté mal puesta o que esté dañada.\n"
                 + "Solucion: Colocarla adecuadamente o en caso de que se encuentre dañada reemplazarla.";
@@ -232,7 +230,7 @@ public class LaBase {
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansEncenderPC));
-        String ansTarjetaVideo = "Verifica que la ram esté limpia e intenta nuevamente, sino funciona es necesario cambiar la tarjeta de vídeo";
+        String ansTarjetaVideo = "Verifica que la ram esté limpia e intenta nuevamente, sino funciona es necesario cambiar la tarjeta de vídeo--limpiarInformacion";
         Rule fallaVerificarComputador = new Rule(base, "No funcionó al prender el computador", new Clause[]{
             new Clause(pantalla, cond, "Apagado"),
             new Clause(computador, cond, "Apagado"),
@@ -267,7 +265,7 @@ public class LaBase {
         this.pantalla.setValue(validarExistenciaParametro(componentes, "pantalla"));
         this.sonido.setValue(validarExistenciaParametro(componentes, "sonido"));
         this.entorno.setValue(validarExistenciaParametro(componentes, "entorno"));
-        this.mensajeEnSistema.setValue(validarExistenciaParametro(componentes, "mensaje en sistema"));
+        this.mensajeEnSistema.setValue(validarExistenciaParametro(componentes, "mensajeEnSistema"));
         this.raton.setValue(validarExistenciaParametro(componentes, "raton"));
         this.teclado.setValue(validarExistenciaParametro(componentes, "teclado"));
 

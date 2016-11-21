@@ -36,7 +36,7 @@ public class ActionServlet extends HttpServlet {
             rta.setListaPropiedades(listaPropiedadesConfiguradas);
             rta = validarFrase(mensaje, rta, listaPropiedadesConfiguradas);
 
-            if(rta.getObjetoPendiente() == null && rta.getMensaje() == sinRespuestas){
+            if (rta.getObjetoPendiente() == null && rta.getMensaje() == sinRespuestas) {
                 rta.setObjetoPendiente(gson.fromJson(request.getParameter("objetoPendiente"), Computador.class));
             }
             out.print(gson.toJson(rta));
@@ -75,6 +75,10 @@ public class ActionServlet extends HttpServlet {
         }
         if (respuesta.indexOf("--") > 0) {
             String[] parametros = respuesta.split("--");
+            if (parametros[1].equals("limpiarInformacion")) {
+                rta.setListaPropiedades(null);
+                return rta;
+            }
             propiedadPendiente.setNombre(parametros[1]);
             propiedadPendiente.setEstado(parametros[2]);
             rta.setMensaje(parametros[0]);
