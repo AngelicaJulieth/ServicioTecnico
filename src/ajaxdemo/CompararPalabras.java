@@ -20,6 +20,7 @@ public class CompararPalabras {
     private String[] sinonimosSaludos;
     private HashMap<String, String[]> sinonimosPartesComputador;
     private Computador computador;
+    private String[] palabrasIgnoradas;
     private HashMap<String, String> propiedadesComputador;
     //private List<Computador> partesComputador;
 
@@ -31,14 +32,16 @@ public class CompararPalabras {
         sinonimosNombresEstado = new HashMap<String, String[]>();
         sinonimosPartesComputador = new HashMap<String, String[]>();
         sinonimosSaludos = new String[]{"hola", "buenos días", "buenos dias", "buenas noches", "buenas tardes", "buen día", "buenas"};
+        palabrasIgnoradas = new String[]{"un", "una", "la", "no", "aparece", "muestra", "el", "las", "los", "mi", "se"};
 
         //  partesComputador = new ArrayList<Computador>();
         propiedadesComputador = new HashMap<>();
         sinonimosEstado.put("Reiniciando", new String[]{"se reinicia", "se apaga y prende nuevamente"});//FIXME: Cambiar sinonimos
         sinonimosEstado.put("Parpadeos", new String[]{"prende y apaga", "parpadea"});//FIXME: Cambiar sinonimos
         sinonimosEstado.put("Encendida", new String[]{"encendida", "prendida", ""});
-        sinonimosEstado.put("No_es_relevante", new String[]{"está bien", "no hay problemas"});
-        //sinonimosEstado.put("Error al cargar el sistema operativo", new String[]{"No carga sistema operativo", "Error al cargar el sistema operativo"});
+        sinonimosEstado.put("No_es_relevante", new String[]{"está bien", "no hay problema"});
+        sinonimosEstado.put("Error al cargar el sistema operativo", new String[]{"no carga sistema operativo", "Error al cargar el sistema operativo"});
+        sinonimosEstado.put("Poca_memoria_cierre_programas", new String[]{"memoria insuficiente", "cierre programas"});
         sinonimosEstado.put("Apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "esta negra"});
         sinonimosEstado.put("Si", new String[]{"Si", "si", "correcto", "verdad", "afirmativo"});
         sinonimosEstado.put("No", new String[]{"No", "no"});
@@ -46,7 +49,7 @@ public class CompararPalabras {
         sinonimosPartesComputador.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido", "suena"});
         sinonimosPartesComputador.put("pantalla", new String[]{"pantalla", "monitor", "televisor"});
         sinonimosPartesComputador.put("computador", new String[]{"computador", "PC", "CPU", "ordenador", "procesador"});
-        sinonimosPartesComputador.put("mensaje", new String[]{"letrero", "aviso", "nota", "anuncio", "notificacion", "señal", "advertencia", "consejo", "indicacion", "comunicado", "observacion", "noticia", "sugerencia"});
+        sinonimosPartesComputador.put("mensajeEnSistema", new String[]{"mensaje","letrero", "aviso", "nota", "anuncio", "notificacion", "señal", "advertencia", "consejo", "indicacion", "comunicado", "observacion", "noticia", "sugerencia"});
     }
 
     public String desintegrarFrase(String frase) {
@@ -57,11 +60,11 @@ public class CompararPalabras {
             String palabraActual = palabras[indice].toLowerCase();
             palabraAnterior = palabraAnterior.toLowerCase();
             Boolean esSaludo = obtenerSaludos(palabraActual, palabraAnterior);
+            if (verificarSiEsIgnorada(palabraActual)) {
+                continue;
+            }
             if (esSaludo && !palabraActual.toLowerCase().equals("no")) {
                 return "Buen día, ¿Tienes algún problema con tu computador?";
-            }
-            if (palabraActual.equals("mi") || palabraActual.equals("no") || palabraActual.equals("el") || palabraActual.equals("la")) {
-                continue;
             }
             if (palabraActual.equals("del") || palabraActual.equals("de")) {
                 indice++;
@@ -73,6 +76,15 @@ public class CompararPalabras {
             obtenerParteDeComputador(palabraActual);
         }
         return null;
+    }
+
+    private Boolean verificarSiEsIgnorada(String palabra) {
+        for (int indiceIgnoradas = 0; indiceIgnoradas < palabrasIgnoradas.length; indiceIgnoradas++) {
+            if (palabra.equals(palabrasIgnoradas[indiceIgnoradas])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Boolean obtenerSaludos(String palabra, String anterior) {
