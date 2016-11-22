@@ -77,6 +77,7 @@ public class ActionServlet extends HttpServlet {
             String[] parametros = respuesta.split("--");
             if (parametros[1].equals("limpiarInformacion")) {
                 rta.setListaPropiedades(null);
+                rta.setMensaje(parametros[0]);
                 return rta;
             }
             propiedadPendiente.setNombre(parametros[1]);
