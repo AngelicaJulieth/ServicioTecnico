@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class LaBase {
 
-    private final BooleanRuleBase base = new BooleanRuleBase("Cursos");
+    private final BooleanRuleBase base = new BooleanRuleBase("ServicioTecnio");
 
     private RuleVariable pantalla = null;
     private RuleVariable sonido = null;
@@ -28,36 +28,34 @@ public class LaBase {
 
     public LaBase() {
 
+        //<editor-fold desc="Inicializar las variables de la clase" defaultstate="collapsed">
+        //Se definne las variables con las que se trabajará para hacer las reglas de inferencia
+        //Se define que la variable es una variable para las reglas
         this.problema = new RuleVariable(base, "Existe un problema");
+        //Se discriminan cuales son los posibles estados para la variables, o cuales son las que se controlan
         this.problema.setLabels("Si No");
+
         this.verificacion = new RuleVariable(base, "Resultado de un consejo de verificación");
         this.verificacion.setLabels("Si No");
 
-        //<editor-fold desc="Posibles estados" defaultstate="collapsed">
-        //variables en pantalla
         this.pantalla = new RuleVariable(base, "Estado del monitor");
         this.pantalla.setLabels("Apagado Mesaje_con_la_palabra_boot Parpadeos Encendida No_es_relevante");
+
         this.computador = new RuleVariable(base, "Estado del computador");
         this.computador.setLabels("Apagado Encendida No_es_relevante Reiniciando");
 
         this.puerto_usb = new RuleVariable(base, "Valida estado puertos USB");
         this.puerto_usb.setLabels("Defectuosa No_relevante");
-        /*this.fuente = new RuleVariable(base, "Estado de la fuente de energía");
-         this.fuente.setLabels("Apagado Encendida No_es_relevante");*/
 
-        //variables en Sonido
         this.sonido = new RuleVariable(base, "Posibles Sonidos");
         this.sonido.setLabels("Sonido_metalico_en_CPU Pitido_largo No_es_relevante");
 
-        //variables en el entorno
         this.entorno = new RuleVariable(base, "Variables en el entorno");
         this.entorno.setLabels("Se_fue_la_luz_anteriormente Se_presenta_una_temperatura_elevada No_es_relevante");
 
-        //mensaje del sistema operativo
         this.mensajeEnSistema = new RuleVariable(base, "Mensajes del sistema Operativo No_es_relevante");
         this.mensajeEnSistema.setLabels("Poca_memoria_cierre_programas No_es_relevante");
 
-        //estado del raton
         this.raton = new RuleVariable(base, "Estado del raton");
         this.raton.setLabels("El_puntero_en_pantalla_no_responde Apagado No_es_relevante");
 
@@ -66,12 +64,46 @@ public class LaBase {
         this.teclado.setLabels("El_teclado_no_responde");
 
         this.falla = new RuleVariable(base, "Servivio tecnico dice:");
+        //Es la condición con la que se hará relaciones entre variables y estados
+        Condition cond = new Condition("=");
+        //</editor-fold>
+        //<editor-fold desc="Base de conocimientos para cuando es mensaje de boot" defaultstate="collapsed">
+        //Es el mensaje que se debe mostrar cuando la regla se cumpla
+        String errBoot = "Algún sector de arranque del disco duro se ha dañado, intente utilizando software para sectores dañados (Recomendación: Hiren’s Boot CD) ¿Te funcionó?--problema(no, verificacion no)";
+        /*
+         *Se crea una regla de inferencia, el primer parámetro es un objeto BooleanRuleBase, 
+         *segundo parámetro es un arreglo de clausulas que definen en que estado debe estar cada variable para que se cumpla
+         * Y el último parámetro es la clausula que fija que la variable "falla" tendrá el error enviado seguidamente
+         */
+        Rule fallaArranque = new Rule(base, "Error arranque", new Clause[]{
+            new Clause(pantalla, cond, "No_es_relevante"),
+            new Clause(sonido, cond, "No_es_relevante"),
+            new Clause(verificacion, cond, "No_es_relevante"),
+            new Clause(puerto_usb, cond, "No_es_relevante"),
+            new Clause(computador, cond, "No_es_relevante"),
+            new Clause(problema, cond, "No_es_relevante"),
+            new Clause(entorno, cond, "No_es_relevante"),
+            new Clause(mensajeEnSistema, cond, "Mesaje_con_la_palabra_boot"),
+            new Clause(raton, cond, "No_es_relevante"),
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errBoot));
+
+        //La siguiente regla tiene exactamente los mismo parámetros pero con la variable verificación en NO, esto es en caso de que el usuario haya dicho que no funciona
+        String errVerificacionBoot = "Puedes encender el computador y seleccionar compatibilidad de CD-ROM, el CD debe tener la imagen del sistema operativo";
+        errVerificacionBoot += "lo que permite reemplazar los archivos de arranque--limpiarInformacion";
+        Rule fallaVerificaArranque = new Rule(base, "Error arranque no funcionó", new Clause[]{
+            new Clause(pantalla, cond, "No_es_relevante"),
+            new Clause(sonido, cond, "No_es_relevante"),
+            new Clause(verificacion, cond, "No"),
+            new Clause(puerto_usb, cond, "No_es_relevante"),
+            new Clause(computador, cond, "No_es_relevante"),
+            new Clause(problema, cond, "No_es_relevante"),
+            new Clause(entorno, cond, "No_es_relevante"),
+            new Clause(mensajeEnSistema, cond, "Mesaje_con_la_palabra_boot"),
+            new Clause(raton, cond, "No_es_relevante"),
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errBoot));
         //</editor-fold>
         //<editor-fold desc="Base de conocimientos para soporte" defaultstate="collapsed">
-        Condition cond = new Condition("=");
-        String errDD1 = "Diagnostico: Se refiere a que los cabezales del lector-escritura, han aterrizado sobre la superficie de los platos.\n"
-                + "Solucion: Para este caso no hay solución, sólo reemplazarlo por otro disco duro.";
-
+        String errDD1 = "Es posible que los cabezales del lector-escritura, han aterrizado sobre la superficie de los platos. En estos casos es necesario reemplazar el disco duro";
         Rule fallaDiscoDuro1 = new Rule(base, "Error en disco duro 1", new Clause[]{
             new Clause(pantalla, cond, "Apagado"),
             new Clause(sonido, cond, "Sonido_metalico_en_CPU"),
@@ -80,21 +112,6 @@ public class LaBase {
             new Clause(entorno, cond, "No_es_relevante"),
             new Clause(computador, cond, "No_es_relevante"),
             new Clause(problema, cond, "No_es_relevante"),
-            new Clause(mensajeEnSistema, cond, "No_es_relevante"),
-            new Clause(raton, cond, "No_es_relevante"),
-            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
-
-        String errDD2 = "Diagnostico: Uno de los sectores de arranque del disco duro se ha dañado el cual no permite completar el proceso para el inicio del sistema.\n"
-                + "Solucion: Realizar un diagnóstico general del disco duro con algún software para reparar sectores dañados. (Software Recomendado Hiren’s Boot CD).";
-
-        Rule fallaDiscoDuro2 = new Rule(base, "Error en disco duro 2", new Clause[]{
-            new Clause(pantalla, cond, "Mesaje_con_la_palabra_boot"),
-            new Clause(sonido, cond, "No_es_relevante"),
-            new Clause(verificacion, cond, "No_es_relevante"),
-            new Clause(puerto_usb, cond, "No_es_relevante"),
-            new Clause(computador, cond, "No_es_relevante"),
-            new Clause(problema, cond, "No_es_relevante"),
-            new Clause(entorno, cond, "No_es_relevante"),
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
@@ -169,16 +186,6 @@ public class LaBase {
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, errDD1));
-        //</editor-fold>
-        //<editor-fold desc="Describe en caso de tener problemas o no" defaultstate="collapsed">
-        String ansExisteProblema = "Cuéntame que sucede por favor";
-        Rule mensajeProblema = new Rule(base, "Tiene un problema", new Clause[]{
-            new Clause(problema, cond, "Si")}, new Clause(falla, cond, ansExisteProblema));
-        String ansNoExisteProblema = "Bueno, en caso de tener algún problema no dudes en escribir";
-        Rule mensajeSinProblema = new Rule(base, "No tiene un problema", new Clause[]{
-            new Clause(problema, cond, "No")}, new Clause(falla, cond, ansNoExisteProblema));
-        //</editor-fold>
-
         String ansPantalla = "¿La pantalla está encendida? --pantalla--bool(Encendido,Apagado)";
         Rule fallaIncompletaSonido = new Rule(base, "Sólo se sabe del sonido", new Clause[]{
             new Clause(pantalla, cond, "No_es_relevante"),
@@ -193,7 +200,15 @@ public class LaBase {
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansPantalla));
         //</editor-fold>
-        //<editor-fold desc="Base de conocimientos para pantalla apagada">
+        //<editor-fold desc="Describe en caso de tener problemas o no" defaultstate="collapsed">
+        String ansExisteProblema = "Cuéntame que sucede por favor";
+        Rule mensajeProblema = new Rule(base, "Tiene un problema", new Clause[]{
+            new Clause(problema, cond, "Si")}, new Clause(falla, cond, ansExisteProblema));
+        String ansNoExisteProblema = "Bueno, en caso de tener algún problema no dudes en escribir";
+        Rule mensajeSinProblema = new Rule(base, "No tiene un problema", new Clause[]{
+            new Clause(problema, cond, "No")}, new Clause(falla, cond, ansNoExisteProblema));
+        //</editor-fold>
+        //<editor-fold desc="Base de conocimientos para pantalla apagada" defaultstate="collapsed">
         String ansComputador = "¿El computador está encendido? --computador--bool(Encendido,Apagado)";
         Rule fallaIncompletaPantalla = new Rule(base, "Sólo se sabe de la pantalla", new Clause[]{
             new Clause(pantalla, cond, "Apagado"),
@@ -256,8 +271,7 @@ public class LaBase {
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansTarjetaVideo));
         //</editor-fold>
-
-        //<editor-fold defaultstate"collapsed" desc="Soporte de mouse hecho por Samb">
+        //<editor-fold desc="Fallas en el funcionamiento del mouse" defaultstate="collapsed">
         String ansRaton = "Recuerda que el ratón o mouse debe estar conectado en el puerto de color verde,en caso que sea de entrada USB intente conectarlo en otro puerto ¿Te funcionó?--problema--bool(No, verificacion no)";
         Rule fallaRaton = new Rule(base, "El computador está prendido", new Clause[]{
             new Clause(pantalla, cond, "No_es_relevante"),
@@ -284,10 +298,9 @@ public class LaBase {
             new Clause(raton, cond, "Apagado"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansRatonSinSolucion));
         //</editor-fold>
-
-        //<editor-fold defaultstate"collapsed" desc="Soporte de mouse hecho por Samb">
-        String ansUSBSolucion = "Verifique que la memoria USB esté haciendo contacto, sino intente conectar en otro puerto.--problema--bool(No, verificacion no)";
-        Rule verifiacionFallaUSB = new Rule(base, "No funcionó conectando mouse", new Clause[]{
+        //<editor-fold desc="Fallas en conectores de usb" defaultstate="collapsed">
+        String ansUSBSolucion = "Verifique que la memoria USB esté haciendo contacto, sino intente conectar en otro puerto. ¿Te funcionò?--problema--bool(No, verificacion no)";
+        Rule verifiacionFallaUSB = new Rule(base, "No funciona conector de usb", new Clause[]{
             new Clause(pantalla, cond, "No_es_relevante"),
             new Clause(computador, cond, "No_es_relevante"),
             new Clause(verificacion, cond, "No_es_relevante"),
@@ -298,9 +311,28 @@ public class LaBase {
             new Clause(mensajeEnSistema, cond, "No_es_relevante"),
             new Clause(raton, cond, "No_es_relevante"),
             new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansUSBSolucion));
+        String ansVerificaUSBSolucion = "Si la usb no funciona en otros computadores es necesario cambiar la usb, si funciona en otros equipos y en ningún puerto del computador verifique que los drivers estés correctos";
+        Rule fallaVerificaUSB = new Rule(base, "No funciona conector de usb", new Clause[]{
+            new Clause(pantalla, cond, "No_es_relevante"),
+            new Clause(computador, cond, "No_es_relevante"),
+            new Clause(verificacion, cond, "No"),
+            new Clause(puerto_usb, cond, "Defectuoso"),
+            new Clause(problema, cond, "No_es_relevante"),
+            new Clause(sonido, cond, "No_es_relevante"),
+            new Clause(entorno, cond, "No_es_relevante"),
+            new Clause(mensajeEnSistema, cond, "No_es_relevante"),
+            new Clause(raton, cond, "No_es_relevante"),
+            new Clause(teclado, cond, "No_es_relevante"),}, new Clause(falla, cond, ansUSBSolucion));
         //</editor-fold>
     }
 
+    /**
+     * Permite enviar el valor de las variables de la clase para que el objeto BooleanRuleBase pueda 
+     * determinar la falla más acertada, según la base de conocimiento que está declarada en 
+     * la parte superior
+     * @param componentes - Es un HashMap donde la clave es el nombre de la variable y el valor es su estado
+     * @return String - Envía la falla o mensaje que más se adapte a las variables
+     */
     public String evaluar(HashMap<String, String> componentes) {
         String problema = validarExistenciaParametro(componentes, "problema");
         this.problema.setValue(
@@ -321,6 +353,13 @@ public class LaBase {
         return this.falla.getValue();
     }
 
+    /**
+     * Verifica que una variable exista en el HashMap de componentes y envía su estado
+     * en caso contrario envía "No_es_relevante" ya que de esta forma se declaran en las reglas
+     * @param componentes
+     * @param nombreComponente
+     * @return 
+     */
     private String validarExistenciaParametro(HashMap<String, String> componentes, String nombreComponente) {
         if (componentes.containsKey(nombreComponente)) {
             return componentes.get(nombreComponente);

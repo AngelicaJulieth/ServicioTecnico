@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 public class CompararPalabras {
 
     //<editor-fold desc="Variables de la clase" defaultstatus="collapsed">
-    private FreeLingCliente free;
     private JaroWinkler jaroWinkler;
     private double MINIMO_APROXIMACION = 0.8;
     private double rankingMayorEstado = 0d;
@@ -28,6 +27,7 @@ public class CompararPalabras {
 
     //</editor-fold>
     public void inicializarVariables() {
+        //<editor-fold desc="Asigna valores a sinonimos de estado o de las partes del computador" defaultstatus="collapsed">
         computador = new Computador();
         jaroWinkler = new JaroWinkler();
         sinonimosEstado = new HashMap<String, String[]>();
@@ -44,22 +44,27 @@ public class CompararPalabras {
         sinonimosEstado.put("No_es_relevante", new String[]{"está bien", "no hay problema"});
         sinonimosEstado.put("Error al cargar el sistema operativo", new String[]{"no carga sistema operativo", "Error al cargar el sistema operativo"});
         sinonimosEstado.put("Poca_memoria_cierre_programas", new String[]{"memoria insuficiente", "cierre programas"});
-        sinonimosEstado.put("Apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "esta negra", "no funciona", "no se mueve"});
+        sinonimosEstado.put("Mesaje_con_la_palabra_boot", new String[]{"boot failure", "problema de arranque", "boot"});
+        sinonimosEstado.put("Defectuoso", new String[]{"defectuoso", "no reconoce", "no alumbra", "no conecta"});
+        sinonimosEstado.put("Sonido_metalico_en_CPU", new String[]{"metalico"});
+
+        sinonimosEstado.put("Apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "esta negra", "no funciona", "no se mueve", "no se ve en la pantalla"});
         sinonimosEstado.put("Si", new String[]{"Si", "si", "correcto", "verdad", "afirmativo"});
         sinonimosEstado.put("No", new String[]{"No", "no"});
-        sinonimosEstado.put("Defectuoso", new String[]{"defectuoso", "no reconoce", "no alumbra","no conecta"});
 
-        sinonimosPartesComputador.put("puerto_usb",new String[]{"usb","entrada","puerto","conector"});
-        sinonimosPartesComputador.put("raton",new String[]{"mouse","raton"});
+        sinonimosPartesComputador.put("puerto_usb", new String[]{"usb", "entrada", "puerto", "conector", "pendrive", "memoria"});
+        sinonimosPartesComputador.put("raton", new String[]{"mouse", "raton", "puntero"});
         sinonimosPartesComputador.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido", "suena"});
         sinonimosPartesComputador.put("pantalla", new String[]{"pantalla", "monitor", "televisor"});
         sinonimosPartesComputador.put("computador", new String[]{"computador", "PC", "CPU", "ordenador", "procesador"});
-        sinonimosPartesComputador.put("mensajeEnSistema", new String[]{"mensaje","letrero", "aviso", "nota", "anuncio", "notificacion", "señal", "advertencia", "consejo", "indicacion", "comunicado", "observacion", "noticia", "sugerencia"});
+        sinonimosPartesComputador.put("mensajeEnSistema", new String[]{"mensaje", "letrero", "aviso", "nota", "anuncio", "notificacion", "señal", "advertencia", "consejo", "indicacion", "comunicado", "observacion", "noticia", "sugerencia"});
+        //</editor-fold>
     }
 
     public String desintegrarFrase(String frase) {
         String palabras[] = frase.split(" ");
 
+        //<editor-fold desc="Desarma la frase en palabras y define si es un estado o parte del computador" defaultstatus="collapsed">
         for (int indice = 0; indice < palabras.length; indice++) {
             String palabraAnterior = indice > 1 ? palabras[indice - 1] : "";
             String palabraActual = palabras[indice].toLowerCase();
@@ -80,9 +85,15 @@ public class CompararPalabras {
             //obtenerNombreEstado(palabraActual, nombreEstado);
             obtenerParteDeComputador(palabraActual);
         }
+        //</editor-fold>
         return null;
     }
 
+    /**
+     * Verifica si una palabra es un artículo o una preposición
+     * @param palabra - String con la palabra a comparar
+     * @return Boolean
+     */
     private Boolean verificarSiEsIgnorada(String palabra) {
         for (int indiceIgnoradas = 0; indiceIgnoradas < palabrasIgnoradas.length; indiceIgnoradas++) {
             if (palabra.equals(palabrasIgnoradas[indiceIgnoradas])) {
@@ -194,64 +205,4 @@ public class CompararPalabras {
         LaBase baseConocimiento = new LaBase();
         return baseConocimiento.evaluar(propiedadesComputador);
     }
-
-    /*private void obtenerNombreEstado(String palabra, String nombreEstado) {
-        String parte = obtenerPalabra(sinonimosPartesComputador, palabra);
-        if (parte.isEmpty()) {
-            nombreEstado = parte;
-        }
-    }*/
-    public String obtenerFrases(String f1, String f2) {
-        String[] s1 = f1.split(" ");
-        String[] s2 = f2.split(" ");
-
-        String[] ap = new String[s1.length];
-        for (int i = 0; i < ap.length; i++) {
-            ap[i] = "";
-        }
-
-        int i = 0;
-        for (String b : s1) {
-            for (String c : s2) {
-                if (jaroWinkler.similarity(b, c) > MINIMO_APROXIMACION) {
-                    ap[i] = c;
-                }
-            }
-            i++;
-        }
-
-        StringBuffer sb = new StringBuffer();
-
-        for (String b : ap) {
-            sb.append(b);
-            sb.append(" ");
-        }
-
-        return sb.toString();
-    }
-
-    public String[][] normalizarMensaje(String mensaje) {
-        try {
-            String a[] = free.processSegment(mensaje.toLowerCase()).split("\n");
-            String respuesta[][] = new String[a.length][];
-            /**
-             * [{la palabra mormal} {la palabra lema} {tipo gramatico}
-             * {Probabilidad}] [{la palabra mormal} {la palabra lema} {tipo
-             * gramatico} {Probabilidad}]
-             */
-            for (int i = 0; i < a.length; i++) {
-                String aux[] = a[i].split(" ");
-                if (aux.length > 1) {
-                    respuesta[i] = aux;
-                }
-            }
-
-            return respuesta;
-        } catch (IOException ex) {
-            Logger.getLogger(CompararPalabras.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return null;
-    }
-
 }
