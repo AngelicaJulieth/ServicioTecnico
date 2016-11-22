@@ -47,8 +47,9 @@ public class CompararPalabras {
         sinonimosEstado.put("Apagado", new String[]{"apagado", "apagada", "no enciende", "no prende", "esta negra", "no funciona", "no se mueve"});
         sinonimosEstado.put("Si", new String[]{"Si", "si", "correcto", "verdad", "afirmativo"});
         sinonimosEstado.put("No", new String[]{"No", "no"});
+        sinonimosEstado.put("Defectuoso", new String[]{"defectuoso", "no reconoce", "no alumbra","no conecta"});
 
-        
+        sinonimosPartesComputador.put("puerto_usb",new String[]{"usb","entrada","puerto","conector"});
         sinonimosPartesComputador.put("raton",new String[]{"mouse","raton"});
         sinonimosPartesComputador.put("sonido", new String[]{"sonido", "ruido", "pitidos", "zumbido", "suena"});
         sinonimosPartesComputador.put("pantalla", new String[]{"pantalla", "monitor", "televisor"});
